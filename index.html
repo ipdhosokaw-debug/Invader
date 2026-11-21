@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shooting Game</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    canvas {
+      border: 2px solid #555;
+      background-color: #000;
+      touch-action: none; /* スマホで画面が変にスクロールするのを防ぐ */
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="gameCanvas" width="480" height="600"></canvas>
+
+  <!-- 1. スプライトデータ -->
+  <script src="/jsCode/sprites.js?v=1"></script>
+  <!-- 2. 入力管理（キー・マウス・タッチ） -->
+  <script src="/jsCode/input.js?v=1"></script>
+  <script src="/jsCode/game.js?v=1"></script>
+  <!-- 3. メインのゲームロジック -->
+  <script src="main.js?v=1"></script>
+</body>
+</html>
