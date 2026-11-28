@@ -5,7 +5,7 @@ class SimpleGame {
 
     this.player = {
       x: this.canvas.width / 2 - (13 * 4) / 2,
-      y: this.canvas.height - 100,
+      y: this.canvas.height - 200,
       speed: 5
     };
 

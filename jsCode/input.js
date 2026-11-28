@@ -1,13 +1,29 @@
 class InputHandler {
-  constructor(canvas) {
+  constructor(canvas, shootButtonId = 'shootBtn') {
     this.canvas = canvas;
+    this.shootButton = document.getElementById(shootButtonId);
+
     this.left = false;
     this.right = false;
     this.mouseX = null;
     this.touchActive = false;
     this.touchStartX = 0;
     this.touchCurrentX = 0;
+
+    // 発射状態（押しっぱなし判定 と 単発トリガー用）
+    this.shootHeld = false;
+    this.shootPressed = false;
+
     this.initListeners();
+  }
+
+  // 1フレーム分の「今押されたか（単発）」を取得してリセットする
+  consumeShoot() {
+    if (this.shootPressed) {
+      this.shootPressed = false;
+      return true;
+    }
+    return this.shootHeld; // 連射・押しっぱなしにしたい場合は true を返す
   }
 
   getTouchX(e) {
@@ -17,14 +33,27 @@ class InputHandler {
   }
 
   initListeners() {
-    // （イベントリスナーの登録部分はそのまま）
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a') this.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd') this.right = true;
+
+      // スペースキーで発射（キーリピートは無視して単発扱い）
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault(); // 画面スクロール防止
+        if (!e.repeat) {
+          this.shootPressed = true;
+        }
+        this.shootHeld = true;
+      }
     });
+
     window.addEventListener('keyup', (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a') this.left = false;
       if (e.key === 'ArrowRight' || e.key === 'd') this.right = false;
+
+      if (e.code === 'Space' || e.key === ' ') {
+        this.shootHeld = false;
+      }
     });
 
     this.canvas.addEventListener('mousemove', (e) => {
@@ -49,20 +78,32 @@ class InputHandler {
     window.addEventListener('touchend', () => {
       this.touchActive = false;
     });
+
+    // ★ 発射ボタンのイベント（マウス＆スマホタッチ両対応）
+    if (this.shootButton) {
+      this.shootButton.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        this.shootPressed = true;
+        this.shootHeld = true;
+      });
+
+      const releaseShoot = () => {
+        this.shootHeld = false;
+      };
+
+      this.shootButton.addEventListener('pointerup', releaseShoot);
+      this.shootButton.addEventListener('pointerleave', releaseShoot);
+      this.shootButton.addEventListener('pointercancel', releaseShoot);
+    }
   }
 
-  // ★【新規追加】「結局プレイヤーはどこに動きたいのか」を計算して返す関数
-  // （main.js に書いていた複雑な if/else をここに引っ越す！）
   calculateTargetX(currentPlayerX, playerWidth, canvasWidth, keyboardSpeed) {
-    // 1. マウス操作
     if (this.mouseX !== null) {
       return this.mouseX - playerWidth / 2;
     }
-    // 2. タッチ操作
     if (this.touchActive) {
       return this.touchCurrentX - playerWidth / 2;
     }
-    // 3. キーボード操作
     let newX = currentPlayerX;
     if (this.left) newX -= keyboardSpeed;
     if (this.right) newX += keyboardSpeed;
